@@ -250,6 +250,24 @@ describe('executeNormalAttack', () => {
         expect(result).not.toBeNull();
         expect(result.hit).toBe(true);
     });
+
+    test('permet de tirer après utilisation réelle du sonar', () => {
+        const grid = createEmptyGrid();
+        const ships = [];
+        const powers = [];
+        placeShipOnGrid(grid, ships, SHIPS[0], 0, 0, true);
+        
+        executeSonar(grid, 2, 0);
+        
+        expect(grid[0][0].revealed).toBe(true);
+        expect(grid[0][0].hit).toBeFalsy();
+        
+        const result = executeNormalAttack(grid, ships, powers, 0, 0);
+        
+        expect(result).not.toBeNull();
+        expect(result.hit).toBe(true);
+        expect(grid[0][0].hit).toBe(true);
+    });
 });
 
 describe('executeInstakill', () => {
