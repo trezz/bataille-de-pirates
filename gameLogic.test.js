@@ -236,6 +236,20 @@ describe('executeNormalAttack', () => {
 
         expect(result).toBeNull();
     });
+
+    test('permet de tirer sur une case révélée par le sonar', () => {
+        const grid = createEmptyGrid();
+        const ships = [];
+        const powers = [];
+        placeShipOnGrid(grid, ships, SHIPS[0], 0, 0, true);
+        
+        grid[0][0].revealed = true;
+        
+        const result = executeNormalAttack(grid, ships, powers, 0, 0);
+        
+        expect(result).not.toBeNull();
+        expect(result.hit).toBe(true);
+    });
 });
 
 describe('executeInstakill', () => {

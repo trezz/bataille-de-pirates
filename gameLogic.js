@@ -129,7 +129,7 @@ function markShipAsSunk(grid, ship) {
 function executeNormalAttack(opponentGrid, opponentShips, opponentPowers, x, y) {
     const cell = opponentGrid[y][x];
 
-    if (cell && (cell.hit || cell === 'miss' || cell.revealed)) {
+    if (cell && (cell.hit || cell === 'miss')) {
         return null;
     }
 
