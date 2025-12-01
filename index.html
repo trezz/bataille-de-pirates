@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>🏴‍☠️ Bataille de Pirates</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <!-- Écran d'accueil -->
+        <div id="welcome-screen" class="screen active">
+            <div class="skull-decoration">☠️</div>
+            <h1>Bataille de Pirates</h1>
+            <p class="subtitle">Préparez vos canons, moussaillons!</p>
+            <button id="start-game" class="pirate-btn">Hisser les voiles!</button>
+            <div class="ship-decoration">⛵</div>
+        </div>
+
+        <!-- Écran de placement des bateaux -->
+        <div id="placement-screen" class="screen">
+            <h2>Capitaine <span id="placement-player">1</span></h2>
+            <p class="instruction">Placez vos navires sur la grille</p>
+            <div id="ship-selection">
+                <div class="ship-to-place" data-size="5" data-name="Galion">
+                    <span class="ship-icon">🚢</span> Galion (5)
+                </div>
+                <div class="ship-to-place" data-size="4" data-name="Frégate">
+                    <span class="ship-icon">⛵</span> Frégate (4)
+                </div>
+                <div class="ship-to-place" data-size="3" data-name="Brick">
+                    <span class="ship-icon">🛶</span> Brick (3)
+                </div>
+                <div class="ship-to-place" data-size="3" data-name="Corvette">
+                    <span class="ship-icon">🚤</span> Corvette (3)
+                </div>
+                <div class="ship-to-place" data-size="2" data-name="Chaloupe">
+                    <span class="ship-icon">🚣</span> Chaloupe (2)
+                </div>
+            </div>
+            <div class="controls">
+                <button id="rotate-btn" class="pirate-btn small">↻ Tourner</button>
+                <button id="reset-placement" class="pirate-btn small danger">Recommencer</button>
+            </div>
+            <div id="placement-grid" class="grid"></div>
+            <button id="confirm-placement" class="pirate-btn" disabled>Confirmer la flotte</button>
+        </div>
+
+        <!-- Écran de transition -->
+        <div id="transition-screen" class="screen">
+            <div class="transition-content">
+                <div class="skull-decoration big">☠️</div>
+                <h2 id="transition-message">Passez le téléphone au Capitaine 2</h2>
+                <p class="countdown" id="countdown"></p>
+                <button id="ready-btn" class="pirate-btn">Je suis prêt!</button>
+            </div>
+        </div>
+
+        <!-- Écran de jeu (tir) -->
+        <div id="game-screen" class="screen">
+            <div class="game-header">
+                <h2>Capitaine <span id="current-player">1</span></h2>
+                <div id="power-indicator" class="hidden">
+                    <span class="power-icon">⚡</span>
+                    <span id="power-name"></span>
+                </div>
+            </div>
+            
+            <div id="powers-panel">
+                <h3>Pouvoirs disponibles:</h3>
+                <div id="powers-list"></div>
+            </div>
+
+            <p class="instruction" id="game-instruction">Choisissez où tirer!</p>
+            
+            <div id="attack-grid" class="grid"></div>
+            
+            <div id="my-fleet-preview">
+                <h4>Ma flotte:</h4>
+                <div id="my-grid-small" class="grid small"></div>
+            </div>
+        </div>
+
+        <!-- Écran de résultat de tir -->
+        <div id="result-screen" class="screen">
+            <div id="result-content">
+                <div id="result-icon"></div>
+                <h2 id="result-title"></h2>
+                <p id="result-message"></p>
+                <div id="power-gained" class="hidden">
+                    <div class="power-badge">
+                        <span class="power-icon">⚡</span>
+                        <span id="power-gained-name"></span>
+                    </div>
+                    <p id="power-description"></p>
+                </div>
+            </div>
+            <button id="continue-btn" class="pirate-btn">Continuer</button>
+        </div>
+
+        <!-- Écran de victoire -->
+        <div id="victory-screen" class="screen">
+            <div class="victory-content">
+                <div class="trophy">🏆</div>
+                <h1>Victoire!</h1>
+                <h2>Capitaine <span id="winner">1</span></h2>
+                <p>a conquis les sept mers!</p>
+                <div class="celebration">🎉🏴‍☠️🎉</div>
+                <button id="new-game-btn" class="pirate-btn">Nouvelle bataille</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
