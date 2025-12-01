@@ -581,24 +581,34 @@ function executeSonar(x, y, opponent) {
     const opponentGrid = gameState.players[opponent].grid;
     const cells = getPowerTargetCells(x, y, 'sonar');
     
-    let shipsDetected = 0;
+    let cellsRevealed = 0;
+    const shipsDetected = new Set();
     
     cells.forEach(({x: cx, y: cy}) => {
         const cell = opponentGrid[cy][cx];
         if (cell && cell.shipId && !cell.hit) {
-            shipsDetected++;
+            cellsRevealed++;
+            shipsDetected.add(cell.shipId);
             opponentGrid[cy][cx].revealed = true;
         } else if (!cell) {
             opponentGrid[cy][cx] = 'miss';
         }
     });
     
+    const shipCount = shipsDetected.size;
+    let message;
+    if (shipCount > 0) {
+        message = `Sonar: ${shipCount} navire(s) détecté(s) (${cellsRevealed} cases)!`;
+    } else {
+        message = 'Sonar: Aucun navire détecté dans cette zone.';
+    }
+    
     return { 
         hit: false, 
         sunk: null, 
-        message: shipsDetected > 0 ? `Sonar: ${shipsDetected} case(s) de navire détectée(s)!` : 'Sonar: Aucun navire détecté dans cette zone.', 
+        message: message, 
         powerUsed: 'sonar',
-        sonarResult: shipsDetected
+        sonarResult: shipCount
     };
 }
 
