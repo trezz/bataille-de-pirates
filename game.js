@@ -87,12 +87,20 @@ function resetPlacementUI() {
 function selectShip(shipElement) {
     if (shipElement.classList.contains('placed')) return;
     
+    const size = parseInt(shipElement.dataset.size);
+    const name = shipElement.dataset.name;
+    
+    const alreadyPlaced = gameState.players[gameState.currentPlayer].ships.find(s => s.name === name);
+    if (alreadyPlaced) {
+        shipElement.classList.add('placed');
+        return;
+    }
+    
     document.querySelectorAll('.ship-to-place').forEach(s => s.classList.remove('selected'));
     shipElement.classList.add('selected');
     
-    const size = parseInt(shipElement.dataset.size);
-    const name = shipElement.dataset.name;
-    gameState.selectedShip = SHIPS.find(s => s.size === size && s.name === name);
+    const shipTemplate = SHIPS.find(s => s.size === size && s.name === name);
+    gameState.selectedShip = { ...shipTemplate };
 }
 
 function rotateShip() {
