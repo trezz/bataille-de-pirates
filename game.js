@@ -208,7 +208,7 @@ function placeShip(startX, startY) {
         hits: 0
     });
     
-    const shipElement = document.querySelector(`.ship-to-place[data-size="${gameState.selectedShip.size}"]`);
+    const shipElement = document.querySelector(`.ship-to-place[data-size="${gameState.selectedShip.size}"][data-name="${gameState.selectedShip.name}"]`);
     shipElement.classList.add('placed');
     shipElement.classList.remove('selected');
     
@@ -423,10 +423,10 @@ function getPowerTargetCells(x, y, power) {
             }
             break;
         case 'sonar':
-            cells.push(
-                {x: x-1, y}, {x: x+1, y},
-                {x, y: y-1}, {x, y: y+1}
-            );
+            for (let i = 1; i <= 5; i++) {
+                cells.push({x: x-i, y}, {x: x+i, y}, {x, y: y-i}, {x, y: y+i});
+            }
+            cells.push({x: x-1, y: y-1}, {x: x+1, y: y-1}, {x: x-1, y: y+1}, {x: x+1, y: y+1});
             break;
         case 'kraken':
             cells.push(
@@ -588,6 +588,8 @@ function executeSonar(x, y, opponent) {
         if (cell && cell.shipId && !cell.hit) {
             shipsDetected++;
             opponentGrid[cy][cx].revealed = true;
+        } else if (!cell) {
+            opponentGrid[cy][cx] = 'miss';
         }
     });
     
