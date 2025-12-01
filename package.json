@@ -1,0 +1,13 @@
+{
+  "name": "bataille-de-pirates",
+  "version": "1.0.0",
+  "description": "Jeu de bataille navale avec pouvoirs spéciaux",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0"
+  }
+}
