@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"connectrpc.com/connect"
-	"github.com/trezz/bataille-de-pirates/server/gen/proto/pirates/v1/piratesv1connect"
+	"github.com/trezz/bataille-de-pirates/server/gen/pirates/v1/piratesv1connect"
 	"github.com/trezz/bataille-de-pirates/server/internal/transport"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"

@@ -34,11 +34,17 @@ function setupEventListeners() {
     $('start-local').addEventListener('click', startLocalGame);
     $('start-online').addEventListener('click', showOnlineScreen);
     $('rotate-btn').addEventListener('click', rotateShip);
+    $('random-placement').addEventListener('click', randomPlacement);
     $('reset-placement').addEventListener('click', resetPlacement);
     $('confirm-placement').addEventListener('click', confirmPlacement);
     $('ready-btn').addEventListener('click', handleReadyClick);
     $('continue-btn').addEventListener('click', handleContinue);
-    $('new-game-btn').addEventListener('click', () => location.reload());
+    $('new-game-btn').addEventListener('click', () => {
+        if (multiplayerClient) {
+            multiplayerClient.disconnect();
+        }
+        location.reload();
+    });
 
     // Online mode listeners
     $('back-to-menu').addEventListener('click', backToMenu);
@@ -90,6 +96,8 @@ async function connectToServer() {
         showScreen('lobby-screen');
 
         refreshPlayerList();
+        // Auto-refresh player list every 3 seconds
+        setInterval(refreshPlayerList, 3000);
     } catch (error) {
         console.error('Connection error:', error);
         $('status-message').textContent = 'Erreur de connexion: ' + error.message;
@@ -273,6 +281,7 @@ function startOnlineGame(game) {
     gameState.currentPlayer = 1;
     gameState.onlineGameId = game.gameId;
     gameState.myTurnFirst = game.yourTurnFirst;
+    gameState.opponentGrid = createEmptyGrid();
 
     resetPlacementUI();
     $('placement-player').textContent = multiplayerClient.player.displayName;
@@ -342,6 +351,18 @@ function resetPlacement() {
     gameState.players[gameState.currentPlayer].ships = [];
     resetPlacementUI();
     renderPlacementGrid();
+}
+
+function randomPlacement() {
+    const player = gameState.currentPlayer;
+    placeShipsRandomly(gameState.players[player].grid, gameState.players[player].ships);
+    document.querySelectorAll('.ship-to-place').forEach(el => {
+        el.classList.add('placed');
+        el.classList.remove('selected');
+    });
+    gameState.selectedShip = null;
+    renderPlacementGrid();
+    checkPlacementComplete();
 }
 
 function renderPlacementGrid() {
@@ -730,6 +751,8 @@ function showOnlinePowerResult(result) {
     resultMessage.textContent = '';
 
     if (result.sunkShips && result.sunkShips.length > 0) {
+        resultIcon.textContent = '☠️';
+        resultTitle.textContent = 'Coulé!';
         powerGained.classList.remove('hidden');
         $('power-gained-name').textContent = result.sunkShips[0].name + ' coulé!';
         $('power-description').textContent = `L'adversaire obtient un pouvoir!`;
@@ -739,13 +762,23 @@ function showOnlinePowerResult(result) {
 
     result.cellsAffected.forEach(cell => {
         const isHit = cell.state === 3 || cell.state === 4; // HIT or SUNK
-        updateOnlineAttackGrid(cell.position, isHit, null);
+        const isSunk = cell.state === 4;
+        const sunkShip = isSunk && result.sunkShips ? result.sunkShips.find(s => true) : null;
+        updateOnlineAttackGrid(cell.position, isHit, sunkShip);
     });
 
     showScreen('result-screen');
 }
 
 function updateOnlineAttackGrid(coord, hit, sunkShip) {
+    if (sunkShip) {
+        gameState.opponentGrid[coord.y][coord.x] = { hit: true, sunk: true, shipId: sunkShip.name };
+    } else if (hit) {
+        gameState.opponentGrid[coord.y][coord.x] = { hit: true, shipId: 'unknown' };
+    } else {
+        gameState.opponentGrid[coord.y][coord.x] = 'miss';
+    }
+
     const cell = document.querySelector(`#attack-grid .cell[data-x="${coord.x}"][data-y="${coord.y}"]`);
     if (cell) {
         if (sunkShip) {
@@ -759,13 +792,20 @@ function updateOnlineAttackGrid(coord, hit, sunkShip) {
 }
 
 function handleTurnStarted(turn) {
+    console.log('handleTurnStarted called:', turn);
+    console.log('gameState before:', gameState);
+    
+    gameState.phase = 'battle';
     gameState.isMyTurn = turn.yourTurn;
     gameState.availablePowers = turn.availablePowers;
 
     if (turn.yourTurn) {
+        console.log('My turn - showing game-screen');
         showScreen('game-screen');
         renderOnlineBattleUI();
+        renderOnlineGrids();
     } else {
+        console.log('Opponent turn - showing waiting screen');
         $('waiting-message').textContent = 'Tour de l\'adversaire...';
         showScreen('waiting-opponent-screen');
     }
@@ -779,14 +819,24 @@ function handleOpponentAction(action) {
             if (update.state === 4) { // SUNK
                 cell.sunk = true;
             }
+        } else {
+            gameState.players[1].grid[update.position.y][update.position.x] = 'miss';
         }
     });
 }
 
 function handleOnlineGameOver(result) {
+    const victoryContent = document.querySelector('.victory-content');
+    const trophy = victoryContent.querySelector('.trophy');
+    const title = victoryContent.querySelector('h1');
+    
     if (result.youWon) {
+        trophy.textContent = '🏆';
+        title.textContent = 'Victoire!';
         $('winner').textContent = multiplayerClient.player.displayName;
     } else {
+        trophy.textContent = '💀';
+        title.textContent = 'Défaite...';
         $('winner').textContent = opponentInfo ? opponentInfo.displayName : 'Adversaire';
     }
     showScreen('victory-screen');
@@ -796,6 +846,11 @@ function renderOnlineBattleUI() {
     $('current-player').textContent = multiplayerClient.player.displayName;
     renderOnlinePowers();
     updateGameInstruction();
+}
+
+function renderOnlineGrids() {
+    renderAttackGrid(gameState.opponentGrid);
+    renderMyFleetPreview(gameState.players[1].grid);
 }
 
 function renderOnlinePowers() {

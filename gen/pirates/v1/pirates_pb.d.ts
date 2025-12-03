@@ -289,6 +289,11 @@ export declare class ConnectResponse extends Message<ConnectResponse> {
  * @generated from message pirates.v1.JoinQueueRequest
  */
 export declare class JoinQueueRequest extends Message<JoinQueueRequest> {
+  /**
+   * @generated from field: string session_token = 1;
+   */
+  sessionToken: string;
+
   constructor(data?: PartialMessage<JoinQueueRequest>);
 
   static readonly runtime: typeof proto3;
@@ -308,6 +313,11 @@ export declare class JoinQueueRequest extends Message<JoinQueueRequest> {
  * @generated from message pirates.v1.LeaveQueueRequest
  */
 export declare class LeaveQueueRequest extends Message<LeaveQueueRequest> {
+  /**
+   * @generated from field: string session_token = 1;
+   */
+  sessionToken: string;
+
   constructor(data?: PartialMessage<LeaveQueueRequest>);
 
   static readonly runtime: typeof proto3;
@@ -346,6 +356,11 @@ export declare class LeaveQueueResponse extends Message<LeaveQueueResponse> {
  * @generated from message pirates.v1.ListPlayersRequest
  */
 export declare class ListPlayersRequest extends Message<ListPlayersRequest> {
+  /**
+   * @generated from field: string session_token = 1;
+   */
+  sessionToken: string;
+
   constructor(data?: PartialMessage<ListPlayersRequest>);
 
   static readonly runtime: typeof proto3;
@@ -366,7 +381,12 @@ export declare class ListPlayersRequest extends Message<ListPlayersRequest> {
  */
 export declare class ChallengePlayerRequest extends Message<ChallengePlayerRequest> {
   /**
-   * @generated from field: string target_player_id = 1;
+   * @generated from field: string session_token = 1;
+   */
+  sessionToken: string;
+
+  /**
+   * @generated from field: string target_player_id = 2;
    */
   targetPlayerId: string;
 
@@ -414,12 +434,17 @@ export declare class ChallengePlayerResponse extends Message<ChallengePlayerResp
  */
 export declare class RespondToMatchRequest extends Message<RespondToMatchRequest> {
   /**
-   * @generated from field: string match_id = 1;
+   * @generated from field: string session_token = 1;
+   */
+  sessionToken: string;
+
+  /**
+   * @generated from field: string match_id = 2;
    */
   matchId: string;
 
   /**
-   * @generated from field: bool accepted = 2;
+   * @generated from field: bool accepted = 3;
    */
   accepted: boolean;
 
@@ -442,6 +467,11 @@ export declare class RespondToMatchRequest extends Message<RespondToMatchRequest
  * @generated from message pirates.v1.ForfeitRequest
  */
 export declare class ForfeitRequest extends Message<ForfeitRequest> {
+  /**
+   * @generated from field: string session_token = 1;
+   */
+  sessionToken: string;
+
   constructor(data?: PartialMessage<ForfeitRequest>);
 
   static readonly runtime: typeof proto3;
@@ -477,35 +507,16 @@ export declare class ForfeitResponse extends Message<ForfeitResponse> {
 }
 
 /**
- * @generated from message pirates.v1.SubscribeEventsRequest
+ * @generated from message pirates.v1.PlaceShipsRequest
  */
-export declare class SubscribeEventsRequest extends Message<SubscribeEventsRequest> {
+export declare class PlaceShipsRequest extends Message<PlaceShipsRequest> {
   /**
    * @generated from field: string session_token = 1;
    */
   sessionToken: string;
 
-  constructor(data?: PartialMessage<SubscribeEventsRequest>);
-
-  static readonly runtime: typeof proto3;
-  static readonly typeName = "pirates.v1.SubscribeEventsRequest";
-  static readonly fields: FieldList;
-
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SubscribeEventsRequest;
-
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SubscribeEventsRequest;
-
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SubscribeEventsRequest;
-
-  static equals(a: SubscribeEventsRequest | PlainMessage<SubscribeEventsRequest> | undefined, b: SubscribeEventsRequest | PlainMessage<SubscribeEventsRequest> | undefined): boolean;
-}
-
-/**
- * @generated from message pirates.v1.PlaceShipsRequest
- */
-export declare class PlaceShipsRequest extends Message<PlaceShipsRequest> {
   /**
-   * @generated from field: repeated pirates.v1.Ship ships = 1;
+   * @generated from field: repeated pirates.v1.Ship ships = 2;
    */
   ships: Ship[];
 
@@ -529,7 +540,12 @@ export declare class PlaceShipsRequest extends Message<PlaceShipsRequest> {
  */
 export declare class AttackRequest extends Message<AttackRequest> {
   /**
-   * @generated from field: pirates.v1.Coordinate target = 1;
+   * @generated from field: string session_token = 1;
+   */
+  sessionToken: string;
+
+  /**
+   * @generated from field: pirates.v1.Coordinate target = 2;
    */
   target?: Coordinate;
 
@@ -553,17 +569,22 @@ export declare class AttackRequest extends Message<AttackRequest> {
  */
 export declare class UsePowerRequest extends Message<UsePowerRequest> {
   /**
-   * @generated from field: pirates.v1.PowerType power = 1;
+   * @generated from field: string session_token = 1;
+   */
+  sessionToken: string;
+
+  /**
+   * @generated from field: pirates.v1.PowerType power = 2;
    */
   power: PowerType;
 
   /**
-   * @generated from field: pirates.v1.Coordinate target = 2;
+   * @generated from field: pirates.v1.Coordinate target = 3;
    */
   target?: Coordinate;
 
   /**
-   * @generated from field: bool horizontal = 3;
+   * @generated from field: bool horizontal = 4;
    */
   horizontal: boolean;
 
@@ -580,6 +601,30 @@ export declare class UsePowerRequest extends Message<UsePowerRequest> {
   static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UsePowerRequest;
 
   static equals(a: UsePowerRequest | PlainMessage<UsePowerRequest> | undefined, b: UsePowerRequest | PlainMessage<UsePowerRequest> | undefined): boolean;
+}
+
+/**
+ * @generated from message pirates.v1.SubscribeEventsRequest
+ */
+export declare class SubscribeEventsRequest extends Message<SubscribeEventsRequest> {
+  /**
+   * @generated from field: string session_token = 1;
+   */
+  sessionToken: string;
+
+  constructor(data?: PartialMessage<SubscribeEventsRequest>);
+
+  static readonly runtime: typeof proto3;
+  static readonly typeName = "pirates.v1.SubscribeEventsRequest";
+  static readonly fields: FieldList;
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SubscribeEventsRequest;
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SubscribeEventsRequest;
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SubscribeEventsRequest;
+
+  static equals(a: SubscribeEventsRequest | PlainMessage<SubscribeEventsRequest> | undefined, b: SubscribeEventsRequest | PlainMessage<SubscribeEventsRequest> | undefined): boolean;
 }
 
 /**

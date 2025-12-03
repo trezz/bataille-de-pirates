@@ -1,4 +1,4 @@
-import { createPromiseClient } from "@connectrpc/connect";
+import { createClient } from "@connectrpc/connect";
 import { createConnectTransport } from "@connectrpc/connect-web";
 import { PiratesService } from "./gen/pirates/v1/pirates_connect.js";
 import {
@@ -35,7 +35,7 @@ class MultiplayerClient {
         const initialTransport = createConnectTransport({
             baseUrl: serverUrl,
         });
-        const initialClient = createPromiseClient(PiratesService, initialTransport);
+        const initialClient = createClient(PiratesService, initialTransport);
 
         const request = new ConnectRequest({ displayName });
         const response = await initialClient.connect(request);
@@ -43,19 +43,14 @@ class MultiplayerClient {
         this.player = response.player;
         this.sessionToken = response.sessionToken;
 
-        const self = this;
         this.transport = createConnectTransport({
             baseUrl: serverUrl,
-            interceptors: [
-                (next) => async (req) => {
-                    req.header.set("Authorization", self.sessionToken);
-                    return next(req);
-                },
-            ],
         });
-        this.client = createPromiseClient(PiratesService, this.transport);
+        this.client = createClient(PiratesService, this.transport);
 
-        this.startEventSubscription();
+        this.startEventSubscription().catch(err => {
+            console.error('Failed to start event subscription:', err);
+        });
 
         return this.player;
     }
@@ -64,41 +59,58 @@ class MultiplayerClient {
         this.abortController = new AbortController();
         const request = new SubscribeEventsRequest({ sessionToken: this.sessionToken });
 
+        console.log('Starting event subscription with token:', this.sessionToken);
         try {
             this.eventStream = this.client.subscribeEvents(request, {
                 signal: this.abortController.signal,
             });
 
+            console.log('Event stream created, waiting for events...');
             for await (const event of this.eventStream) {
+                console.log('Received event:', event);
                 this.handleEvent(event);
             }
+            console.log('Event stream ended');
         } catch (err) {
+            console.error('Event stream error:', err);
             if (err.name !== 'AbortError') {
-                console.error('Event stream error:', err);
                 this.emit('error', err);
             }
         }
     }
 
     handleEvent(event) {
-        if (event.queueStatus) {
-            this.emit('queueStatus', event.queueStatus);
-        } else if (event.playerList) {
-            this.emit('playerList', event.playerList);
-        } else if (event.matchProposal) {
-            this.emit('matchProposal', event.matchProposal);
-        } else if (event.matchResult) {
-            this.emit('matchResult', event.matchResult);
-        } else if (event.gameStarted) {
-            this.emit('gameStarted', event.gameStarted);
-        } else if (event.turnStarted) {
-            this.emit('turnStarted', event.turnStarted);
-        } else if (event.opponentAction) {
-            this.emit('opponentAction', event.opponentAction);
-        } else if (event.gameOver) {
-            this.emit('gameOver', event.gameOver);
-        } else if (event.placementUpdate) {
-            this.emit('placementUpdate', event.placementUpdate);
+        const e = event.event;
+        if (!e) return;
+        
+        switch (e.case) {
+            case 'queueStatus':
+                this.emit('queueStatus', e.value);
+                break;
+            case 'playerList':
+                this.emit('playerList', e.value);
+                break;
+            case 'matchProposal':
+                this.emit('matchProposal', e.value);
+                break;
+            case 'matchResult':
+                this.emit('matchResult', e.value);
+                break;
+            case 'gameStarted':
+                this.emit('gameStarted', e.value);
+                break;
+            case 'turnStarted':
+                this.emit('turnStarted', e.value);
+                break;
+            case 'opponentAction':
+                this.emit('opponentAction', e.value);
+                break;
+            case 'gameOver':
+                this.emit('gameOver', e.value);
+                break;
+            case 'placementUpdate':
+                this.emit('placementUpdate', e.value);
+                break;
         }
     }
 
@@ -122,27 +134,27 @@ class MultiplayerClient {
     }
 
     async joinQueue() {
-        const request = new JoinQueueRequest();
+        const request = new JoinQueueRequest({ sessionToken: this.sessionToken });
         return await this.client.joinQueue(request);
     }
 
     async leaveQueue() {
-        const request = new LeaveQueueRequest();
+        const request = new LeaveQueueRequest({ sessionToken: this.sessionToken });
         return await this.client.leaveQueue(request);
     }
 
     async listPlayers() {
-        const request = new ListPlayersRequest();
+        const request = new ListPlayersRequest({ sessionToken: this.sessionToken });
         return await this.client.listPlayers(request);
     }
 
     async challengePlayer(targetPlayerId) {
-        const request = new ChallengePlayerRequest({ targetPlayerId });
+        const request = new ChallengePlayerRequest({ sessionToken: this.sessionToken, targetPlayerId });
         return await this.client.challengePlayer(request);
     }
 
     async respondToMatch(matchId, accepted) {
-        const request = new RespondToMatchRequest({ matchId, accepted });
+        const request = new RespondToMatchRequest({ sessionToken: this.sessionToken, matchId, accepted });
         return await this.client.respondToMatch(request);
     }
 
@@ -155,12 +167,13 @@ class MultiplayerClient {
             horizontal: ship.cells.length > 1 ? ship.cells[1].x !== ship.cells[0].x : true,
         }));
 
-        const request = new PlaceShipsRequest({ ships: protoShips });
+        const request = new PlaceShipsRequest({ sessionToken: this.sessionToken, ships: protoShips });
         return await this.client.placeShips(request);
     }
 
     async attack(x, y) {
         const request = new AttackRequest({
+            sessionToken: this.sessionToken,
             target: new Coordinate({ x, y }),
         });
         return await this.client.attack(request);
@@ -169,6 +182,7 @@ class MultiplayerClient {
     async usePower(powerType, x, y, horizontal = true) {
         const protoType = this.mapPowerType(powerType);
         const request = new UsePowerRequest({
+            sessionToken: this.sessionToken,
             power: protoType,
             target: new Coordinate({ x, y }),
             horizontal,
@@ -197,7 +211,7 @@ class MultiplayerClient {
     }
 
     async forfeit() {
-        const request = new ForfeitRequest();
+        const request = new ForfeitRequest({ sessionToken: this.sessionToken });
         return await this.client.forfeit(request);
     }
 

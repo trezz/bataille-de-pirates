@@ -3,7 +3,7 @@ package game
 import (
 	"testing"
 
-	piratesv1 "github.com/trezz/bataille-de-pirates/server/gen/proto/pirates/v1"
+	piratesv1 "github.com/trezz/bataille-de-pirates/server/gen/pirates/v1"
 )
 
 func TestNewGame(t *testing.T) {

@@ -7,7 +7,7 @@ import (
 	"sync"
 
 	"github.com/google/uuid"
-	piratesv1 "github.com/trezz/bataille-de-pirates/server/gen/proto/pirates/v1"
+	piratesv1 "github.com/trezz/bataille-de-pirates/server/gen/pirates/v1"
 )
 
 var pirateNamePrefixes = []string{

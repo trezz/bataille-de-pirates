@@ -121,7 +121,9 @@ export const ConnectResponse = /*@__PURE__*/ proto3.makeMessageType(
  */
 export const JoinQueueRequest = /*@__PURE__*/ proto3.makeMessageType(
   "pirates.v1.JoinQueueRequest",
-  [],
+  () => [
+    { no: 1, name: "session_token", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ],
 );
 
 /**
@@ -129,7 +131,9 @@ export const JoinQueueRequest = /*@__PURE__*/ proto3.makeMessageType(
  */
 export const LeaveQueueRequest = /*@__PURE__*/ proto3.makeMessageType(
   "pirates.v1.LeaveQueueRequest",
-  [],
+  () => [
+    { no: 1, name: "session_token", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ],
 );
 
 /**
@@ -145,7 +149,9 @@ export const LeaveQueueResponse = /*@__PURE__*/ proto3.makeMessageType(
  */
 export const ListPlayersRequest = /*@__PURE__*/ proto3.makeMessageType(
   "pirates.v1.ListPlayersRequest",
-  [],
+  () => [
+    { no: 1, name: "session_token", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ],
 );
 
 /**
@@ -154,7 +160,8 @@ export const ListPlayersRequest = /*@__PURE__*/ proto3.makeMessageType(
 export const ChallengePlayerRequest = /*@__PURE__*/ proto3.makeMessageType(
   "pirates.v1.ChallengePlayerRequest",
   () => [
-    { no: 1, name: "target_player_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: "session_token", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "target_player_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ],
 );
 
@@ -174,8 +181,9 @@ export const ChallengePlayerResponse = /*@__PURE__*/ proto3.makeMessageType(
 export const RespondToMatchRequest = /*@__PURE__*/ proto3.makeMessageType(
   "pirates.v1.RespondToMatchRequest",
   () => [
-    { no: 1, name: "match_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "accepted", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 1, name: "session_token", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "match_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "accepted", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
   ],
 );
 
@@ -184,7 +192,9 @@ export const RespondToMatchRequest = /*@__PURE__*/ proto3.makeMessageType(
  */
 export const ForfeitRequest = /*@__PURE__*/ proto3.makeMessageType(
   "pirates.v1.ForfeitRequest",
-  [],
+  () => [
+    { no: 1, name: "session_token", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ],
 );
 
 /**
@@ -196,22 +206,13 @@ export const ForfeitResponse = /*@__PURE__*/ proto3.makeMessageType(
 );
 
 /**
- * @generated from message pirates.v1.SubscribeEventsRequest
- */
-export const SubscribeEventsRequest = /*@__PURE__*/ proto3.makeMessageType(
-  "pirates.v1.SubscribeEventsRequest",
-  () => [
-    { no: 1, name: "session_token", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-  ],
-);
-
-/**
  * @generated from message pirates.v1.PlaceShipsRequest
  */
 export const PlaceShipsRequest = /*@__PURE__*/ proto3.makeMessageType(
   "pirates.v1.PlaceShipsRequest",
   () => [
-    { no: 1, name: "ships", kind: "message", T: Ship, repeated: true },
+    { no: 1, name: "session_token", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "ships", kind: "message", T: Ship, repeated: true },
   ],
 );
 
@@ -221,7 +222,8 @@ export const PlaceShipsRequest = /*@__PURE__*/ proto3.makeMessageType(
 export const AttackRequest = /*@__PURE__*/ proto3.makeMessageType(
   "pirates.v1.AttackRequest",
   () => [
-    { no: 1, name: "target", kind: "message", T: Coordinate },
+    { no: 1, name: "session_token", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "target", kind: "message", T: Coordinate },
   ],
 );
 
@@ -231,9 +233,20 @@ export const AttackRequest = /*@__PURE__*/ proto3.makeMessageType(
 export const UsePowerRequest = /*@__PURE__*/ proto3.makeMessageType(
   "pirates.v1.UsePowerRequest",
   () => [
-    { no: 1, name: "power", kind: "enum", T: proto3.getEnumType(PowerType) },
-    { no: 2, name: "target", kind: "message", T: Coordinate },
-    { no: 3, name: "horizontal", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 1, name: "session_token", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "power", kind: "enum", T: proto3.getEnumType(PowerType) },
+    { no: 3, name: "target", kind: "message", T: Coordinate },
+    { no: 4, name: "horizontal", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+  ],
+);
+
+/**
+ * @generated from message pirates.v1.SubscribeEventsRequest
+ */
+export const SubscribeEventsRequest = /*@__PURE__*/ proto3.makeMessageType(
+  "pirates.v1.SubscribeEventsRequest",
+  () => [
+    { no: 1, name: "session_token", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ],
 );
 

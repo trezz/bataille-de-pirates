@@ -94,16 +94,23 @@ message ConnectResponse {
   string session_token = 2;
 }
 
-message JoinQueueRequest {}
+message JoinQueueRequest {
+  string session_token = 1;
+}
 
-message LeaveQueueRequest {}
+message LeaveQueueRequest {
+  string session_token = 1;
+}
 
 message LeaveQueueResponse {}
 
-message ListPlayersRequest {}
+message ListPlayersRequest {
+  string session_token = 1;
+}
 
 message ChallengePlayerRequest {
-  string target_player_id = 1;
+  string session_token = 1;
+  string target_player_id = 2;
 }
 
 message ChallengePlayerResponse {
@@ -111,30 +118,36 @@ message ChallengePlayerResponse {
 }
 
 message RespondToMatchRequest {
-  string match_id = 1;
-  bool accepted = 2;
+  string session_token = 1;
+  string match_id = 2;
+  bool accepted = 3;
 }
 
-message ForfeitRequest {}
-
-message ForfeitResponse {}
-
-message SubscribeEventsRequest {
+message ForfeitRequest {
   string session_token = 1;
 }
 
+message ForfeitResponse {}
+
 message PlaceShipsRequest {
-  repeated Ship ships = 1;
+  string session_token = 1;
+  repeated Ship ships = 2;
 }
 
 message AttackRequest {
-  Coordinate target = 1;
+  string session_token = 1;
+  Coordinate target = 2;
 }
 
 message UsePowerRequest {
-  PowerType power = 1;
-  Coordinate target = 2;
-  bool horizontal = 3;
+  string session_token = 1;
+  PowerType power = 2;
+  Coordinate target = 3;
+  bool horizontal = 4;
+}
+
+message SubscribeEventsRequest {
+  string session_token = 1;
 }
 
 // ============================================================================

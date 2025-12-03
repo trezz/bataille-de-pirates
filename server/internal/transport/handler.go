@@ -11,8 +11,8 @@ import (
 	"github.com/trezz/bataille-de-pirates/server/internal/matchmaker"
 	"github.com/trezz/bataille-de-pirates/server/internal/player"
 
-	pb "github.com/trezz/bataille-de-pirates/server/gen/proto/pirates/v1"
-	"github.com/trezz/bataille-de-pirates/server/gen/proto/pirates/v1/piratesv1connect"
+	pb "github.com/trezz/bataille-de-pirates/server/gen/pirates/v1"
+	"github.com/trezz/bataille-de-pirates/server/gen/pirates/v1/piratesv1connect"
 )
 
 var _ piratesv1connect.PiratesServiceHandler = (*PiratesServer)(nil)
@@ -69,8 +69,7 @@ func (s *PiratesServer) JoinQueue(
 	ctx context.Context,
 	req *connect.Request[pb.JoinQueueRequest],
 ) (*connect.Response[pb.QueueStatusUpdate], error) {
-	token := req.Header().Get("Authorization")
-	p, ok := s.registry.GetByToken(token)
+	p, ok := s.registry.GetByToken(req.Msg.SessionToken)
 	if !ok {
 		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("invalid session token"))
 	}
@@ -89,8 +88,7 @@ func (s *PiratesServer) LeaveQueue(
 	ctx context.Context,
 	req *connect.Request[pb.LeaveQueueRequest],
 ) (*connect.Response[pb.LeaveQueueResponse], error) {
-	token := req.Header().Get("Authorization")
-	p, ok := s.registry.GetByToken(token)
+	p, ok := s.registry.GetByToken(req.Msg.SessionToken)
 	if !ok {
 		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("invalid session token"))
 	}
@@ -105,8 +103,7 @@ func (s *PiratesServer) ListPlayers(
 	ctx context.Context,
 	req *connect.Request[pb.ListPlayersRequest],
 ) (*connect.Response[pb.PlayerListUpdate], error) {
-	token := req.Header().Get("Authorization")
-	_, ok := s.registry.GetByToken(token)
+	_, ok := s.registry.GetByToken(req.Msg.SessionToken)
 	if !ok {
 		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("invalid session token"))
 	}
@@ -126,8 +123,7 @@ func (s *PiratesServer) ChallengePlayer(
 	ctx context.Context,
 	req *connect.Request[pb.ChallengePlayerRequest],
 ) (*connect.Response[pb.ChallengePlayerResponse], error) {
-	token := req.Header().Get("Authorization")
-	p, ok := s.registry.GetByToken(token)
+	p, ok := s.registry.GetByToken(req.Msg.SessionToken)
 	if !ok {
 		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("invalid session token"))
 	}
@@ -146,8 +142,7 @@ func (s *PiratesServer) RespondToMatch(
 	ctx context.Context,
 	req *connect.Request[pb.RespondToMatchRequest],
 ) (*connect.Response[pb.MatchResult], error) {
-	token := req.Header().Get("Authorization")
-	p, ok := s.registry.GetByToken(token)
+	p, ok := s.registry.GetByToken(req.Msg.SessionToken)
 	if !ok {
 		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("invalid session token"))
 	}
@@ -173,8 +168,7 @@ func (s *PiratesServer) PlaceShips(
 	ctx context.Context,
 	req *connect.Request[pb.PlaceShipsRequest],
 ) (*connect.Response[pb.PlacementResult], error) {
-	token := req.Header().Get("Authorization")
-	p, ok := s.registry.GetByToken(token)
+	p, ok := s.registry.GetByToken(req.Msg.SessionToken)
 	if !ok {
 		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("invalid session token"))
 	}
@@ -198,6 +192,7 @@ func (s *PiratesServer) PlaceShips(
 	waitingForOpponent := !g.BothPlayersReady()
 
 	if !waitingForOpponent {
+		g.StartGame()
 		s.notifyTurnStarted(g)
 	} else {
 		opponentID := g.GetOpponentID(p.Proto.Id)
@@ -223,8 +218,7 @@ func (s *PiratesServer) Attack(
 	ctx context.Context,
 	req *connect.Request[pb.AttackRequest],
 ) (*connect.Response[pb.AttackResult], error) {
-	token := req.Header().Get("Authorization")
-	p, ok := s.registry.GetByToken(token)
+	p, ok := s.registry.GetByToken(req.Msg.SessionToken)
 	if !ok {
 		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("invalid session token"))
 	}
@@ -258,8 +252,7 @@ func (s *PiratesServer) UsePower(
 	ctx context.Context,
 	req *connect.Request[pb.UsePowerRequest],
 ) (*connect.Response[pb.PowerResult], error) {
-	token := req.Header().Get("Authorization")
-	p, ok := s.registry.GetByToken(token)
+	p, ok := s.registry.GetByToken(req.Msg.SessionToken)
 	if !ok {
 		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("invalid session token"))
 	}
@@ -293,8 +286,7 @@ func (s *PiratesServer) Forfeit(
 	ctx context.Context,
 	req *connect.Request[pb.ForfeitRequest],
 ) (*connect.Response[pb.ForfeitResponse], error) {
-	token := req.Header().Get("Authorization")
-	p, ok := s.registry.GetByToken(token)
+	p, ok := s.registry.GetByToken(req.Msg.SessionToken)
 	if !ok {
 		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("invalid session token"))
 	}

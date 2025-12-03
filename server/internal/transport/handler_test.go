@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"connectrpc.com/connect"
-	pb "github.com/trezz/bataille-de-pirates/server/gen/proto/pirates/v1"
+	pb "github.com/trezz/bataille-de-pirates/server/gen/pirates/v1"
 )
 
 func TestPiratesServer_Connect(t *testing.T) {

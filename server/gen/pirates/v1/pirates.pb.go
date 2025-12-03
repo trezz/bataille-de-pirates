@@ -524,6 +524,7 @@ func (x *ConnectResponse) GetSessionToken() string {
 
 type JoinQueueRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	SessionToken  string                 `protobuf:"bytes,1,opt,name=session_token,json=sessionToken,proto3" json:"session_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -558,8 +559,16 @@ func (*JoinQueueRequest) Descriptor() ([]byte, []int) {
 	return file_pirates_v1_pirates_proto_rawDescGZIP(), []int{6}
 }
 
+func (x *JoinQueueRequest) GetSessionToken() string {
+	if x != nil {
+		return x.SessionToken
+	}
+	return ""
+}
+
 type LeaveQueueRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	SessionToken  string                 `protobuf:"bytes,1,opt,name=session_token,json=sessionToken,proto3" json:"session_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -592,6 +601,13 @@ func (x *LeaveQueueRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use LeaveQueueRequest.ProtoReflect.Descriptor instead.
 func (*LeaveQueueRequest) Descriptor() ([]byte, []int) {
 	return file_pirates_v1_pirates_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *LeaveQueueRequest) GetSessionToken() string {
+	if x != nil {
+		return x.SessionToken
+	}
+	return ""
 }
 
 type LeaveQueueResponse struct {
@@ -632,6 +648,7 @@ func (*LeaveQueueResponse) Descriptor() ([]byte, []int) {
 
 type ListPlayersRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	SessionToken  string                 `protobuf:"bytes,1,opt,name=session_token,json=sessionToken,proto3" json:"session_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -666,9 +683,17 @@ func (*ListPlayersRequest) Descriptor() ([]byte, []int) {
 	return file_pirates_v1_pirates_proto_rawDescGZIP(), []int{9}
 }
 
+func (x *ListPlayersRequest) GetSessionToken() string {
+	if x != nil {
+		return x.SessionToken
+	}
+	return ""
+}
+
 type ChallengePlayerRequest struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
-	TargetPlayerId string                 `protobuf:"bytes,1,opt,name=target_player_id,json=targetPlayerId,proto3" json:"target_player_id,omitempty"`
+	SessionToken   string                 `protobuf:"bytes,1,opt,name=session_token,json=sessionToken,proto3" json:"session_token,omitempty"`
+	TargetPlayerId string                 `protobuf:"bytes,2,opt,name=target_player_id,json=targetPlayerId,proto3" json:"target_player_id,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -701,6 +726,13 @@ func (x *ChallengePlayerRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use ChallengePlayerRequest.ProtoReflect.Descriptor instead.
 func (*ChallengePlayerRequest) Descriptor() ([]byte, []int) {
 	return file_pirates_v1_pirates_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *ChallengePlayerRequest) GetSessionToken() string {
+	if x != nil {
+		return x.SessionToken
+	}
+	return ""
 }
 
 func (x *ChallengePlayerRequest) GetTargetPlayerId() string {
@@ -756,8 +788,9 @@ func (x *ChallengePlayerResponse) GetMatchId() string {
 
 type RespondToMatchRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	MatchId       string                 `protobuf:"bytes,1,opt,name=match_id,json=matchId,proto3" json:"match_id,omitempty"`
-	Accepted      bool                   `protobuf:"varint,2,opt,name=accepted,proto3" json:"accepted,omitempty"`
+	SessionToken  string                 `protobuf:"bytes,1,opt,name=session_token,json=sessionToken,proto3" json:"session_token,omitempty"`
+	MatchId       string                 `protobuf:"bytes,2,opt,name=match_id,json=matchId,proto3" json:"match_id,omitempty"`
+	Accepted      bool                   `protobuf:"varint,3,opt,name=accepted,proto3" json:"accepted,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -792,6 +825,13 @@ func (*RespondToMatchRequest) Descriptor() ([]byte, []int) {
 	return file_pirates_v1_pirates_proto_rawDescGZIP(), []int{12}
 }
 
+func (x *RespondToMatchRequest) GetSessionToken() string {
+	if x != nil {
+		return x.SessionToken
+	}
+	return ""
+}
+
 func (x *RespondToMatchRequest) GetMatchId() string {
 	if x != nil {
 		return x.MatchId
@@ -808,6 +848,7 @@ func (x *RespondToMatchRequest) GetAccepted() bool {
 
 type ForfeitRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	SessionToken  string                 `protobuf:"bytes,1,opt,name=session_token,json=sessionToken,proto3" json:"session_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -840,6 +881,13 @@ func (x *ForfeitRequest) ProtoReflect() protoreflect.Message {
 // Deprecated: Use ForfeitRequest.ProtoReflect.Descriptor instead.
 func (*ForfeitRequest) Descriptor() ([]byte, []int) {
 	return file_pirates_v1_pirates_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *ForfeitRequest) GetSessionToken() string {
+	if x != nil {
+		return x.SessionToken
+	}
+	return ""
 }
 
 type ForfeitResponse struct {
@@ -878,60 +926,17 @@ func (*ForfeitResponse) Descriptor() ([]byte, []int) {
 	return file_pirates_v1_pirates_proto_rawDescGZIP(), []int{14}
 }
 
-type SubscribeEventsRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	SessionToken  string                 `protobuf:"bytes,1,opt,name=session_token,json=sessionToken,proto3" json:"session_token,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *SubscribeEventsRequest) Reset() {
-	*x = SubscribeEventsRequest{}
-	mi := &file_pirates_v1_pirates_proto_msgTypes[15]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *SubscribeEventsRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SubscribeEventsRequest) ProtoMessage() {}
-
-func (x *SubscribeEventsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pirates_v1_pirates_proto_msgTypes[15]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SubscribeEventsRequest.ProtoReflect.Descriptor instead.
-func (*SubscribeEventsRequest) Descriptor() ([]byte, []int) {
-	return file_pirates_v1_pirates_proto_rawDescGZIP(), []int{15}
-}
-
-func (x *SubscribeEventsRequest) GetSessionToken() string {
-	if x != nil {
-		return x.SessionToken
-	}
-	return ""
-}
-
 type PlaceShipsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Ships         []*Ship                `protobuf:"bytes,1,rep,name=ships,proto3" json:"ships,omitempty"`
+	SessionToken  string                 `protobuf:"bytes,1,opt,name=session_token,json=sessionToken,proto3" json:"session_token,omitempty"`
+	Ships         []*Ship                `protobuf:"bytes,2,rep,name=ships,proto3" json:"ships,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *PlaceShipsRequest) Reset() {
 	*x = PlaceShipsRequest{}
-	mi := &file_pirates_v1_pirates_proto_msgTypes[16]
+	mi := &file_pirates_v1_pirates_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -943,7 +948,7 @@ func (x *PlaceShipsRequest) String() string {
 func (*PlaceShipsRequest) ProtoMessage() {}
 
 func (x *PlaceShipsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pirates_v1_pirates_proto_msgTypes[16]
+	mi := &file_pirates_v1_pirates_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -956,7 +961,14 @@ func (x *PlaceShipsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PlaceShipsRequest.ProtoReflect.Descriptor instead.
 func (*PlaceShipsRequest) Descriptor() ([]byte, []int) {
-	return file_pirates_v1_pirates_proto_rawDescGZIP(), []int{16}
+	return file_pirates_v1_pirates_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *PlaceShipsRequest) GetSessionToken() string {
+	if x != nil {
+		return x.SessionToken
+	}
+	return ""
 }
 
 func (x *PlaceShipsRequest) GetShips() []*Ship {
@@ -968,14 +980,15 @@ func (x *PlaceShipsRequest) GetShips() []*Ship {
 
 type AttackRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Target        *Coordinate            `protobuf:"bytes,1,opt,name=target,proto3" json:"target,omitempty"`
+	SessionToken  string                 `protobuf:"bytes,1,opt,name=session_token,json=sessionToken,proto3" json:"session_token,omitempty"`
+	Target        *Coordinate            `protobuf:"bytes,2,opt,name=target,proto3" json:"target,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *AttackRequest) Reset() {
 	*x = AttackRequest{}
-	mi := &file_pirates_v1_pirates_proto_msgTypes[17]
+	mi := &file_pirates_v1_pirates_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -987,7 +1000,7 @@ func (x *AttackRequest) String() string {
 func (*AttackRequest) ProtoMessage() {}
 
 func (x *AttackRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pirates_v1_pirates_proto_msgTypes[17]
+	mi := &file_pirates_v1_pirates_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1000,7 +1013,14 @@ func (x *AttackRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AttackRequest.ProtoReflect.Descriptor instead.
 func (*AttackRequest) Descriptor() ([]byte, []int) {
-	return file_pirates_v1_pirates_proto_rawDescGZIP(), []int{17}
+	return file_pirates_v1_pirates_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *AttackRequest) GetSessionToken() string {
+	if x != nil {
+		return x.SessionToken
+	}
+	return ""
 }
 
 func (x *AttackRequest) GetTarget() *Coordinate {
@@ -1012,16 +1032,17 @@ func (x *AttackRequest) GetTarget() *Coordinate {
 
 type UsePowerRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Power         PowerType              `protobuf:"varint,1,opt,name=power,proto3,enum=pirates.v1.PowerType" json:"power,omitempty"`
-	Target        *Coordinate            `protobuf:"bytes,2,opt,name=target,proto3" json:"target,omitempty"`
-	Horizontal    bool                   `protobuf:"varint,3,opt,name=horizontal,proto3" json:"horizontal,omitempty"`
+	SessionToken  string                 `protobuf:"bytes,1,opt,name=session_token,json=sessionToken,proto3" json:"session_token,omitempty"`
+	Power         PowerType              `protobuf:"varint,2,opt,name=power,proto3,enum=pirates.v1.PowerType" json:"power,omitempty"`
+	Target        *Coordinate            `protobuf:"bytes,3,opt,name=target,proto3" json:"target,omitempty"`
+	Horizontal    bool                   `protobuf:"varint,4,opt,name=horizontal,proto3" json:"horizontal,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *UsePowerRequest) Reset() {
 	*x = UsePowerRequest{}
-	mi := &file_pirates_v1_pirates_proto_msgTypes[18]
+	mi := &file_pirates_v1_pirates_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1033,7 +1054,7 @@ func (x *UsePowerRequest) String() string {
 func (*UsePowerRequest) ProtoMessage() {}
 
 func (x *UsePowerRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pirates_v1_pirates_proto_msgTypes[18]
+	mi := &file_pirates_v1_pirates_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1046,7 +1067,14 @@ func (x *UsePowerRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UsePowerRequest.ProtoReflect.Descriptor instead.
 func (*UsePowerRequest) Descriptor() ([]byte, []int) {
-	return file_pirates_v1_pirates_proto_rawDescGZIP(), []int{18}
+	return file_pirates_v1_pirates_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *UsePowerRequest) GetSessionToken() string {
+	if x != nil {
+		return x.SessionToken
+	}
+	return ""
 }
 
 func (x *UsePowerRequest) GetPower() PowerType {
@@ -1068,6 +1096,50 @@ func (x *UsePowerRequest) GetHorizontal() bool {
 		return x.Horizontal
 	}
 	return false
+}
+
+type SubscribeEventsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SessionToken  string                 `protobuf:"bytes,1,opt,name=session_token,json=sessionToken,proto3" json:"session_token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SubscribeEventsRequest) Reset() {
+	*x = SubscribeEventsRequest{}
+	mi := &file_pirates_v1_pirates_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SubscribeEventsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SubscribeEventsRequest) ProtoMessage() {}
+
+func (x *SubscribeEventsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pirates_v1_pirates_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SubscribeEventsRequest.ProtoReflect.Descriptor instead.
+func (*SubscribeEventsRequest) Descriptor() ([]byte, []int) {
+	return file_pirates_v1_pirates_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *SubscribeEventsRequest) GetSessionToken() string {
+	if x != nil {
+		return x.SessionToken
+	}
+	return ""
 }
 
 type QueueStatusUpdate struct {
@@ -2027,32 +2099,41 @@ const file_pirates_v1_pirates_proto_rawDesc = "" +
 	"\fdisplay_name\x18\x01 \x01(\tR\vdisplayName\"b\n" +
 	"\x0fConnectResponse\x12*\n" +
 	"\x06player\x18\x01 \x01(\v2\x12.pirates.v1.PlayerR\x06player\x12#\n" +
-	"\rsession_token\x18\x02 \x01(\tR\fsessionToken\"\x12\n" +
-	"\x10JoinQueueRequest\"\x13\n" +
-	"\x11LeaveQueueRequest\"\x14\n" +
-	"\x12LeaveQueueResponse\"\x14\n" +
-	"\x12ListPlayersRequest\"B\n" +
-	"\x16ChallengePlayerRequest\x12(\n" +
-	"\x10target_player_id\x18\x01 \x01(\tR\x0etargetPlayerId\"4\n" +
+	"\rsession_token\x18\x02 \x01(\tR\fsessionToken\"7\n" +
+	"\x10JoinQueueRequest\x12#\n" +
+	"\rsession_token\x18\x01 \x01(\tR\fsessionToken\"8\n" +
+	"\x11LeaveQueueRequest\x12#\n" +
+	"\rsession_token\x18\x01 \x01(\tR\fsessionToken\"\x14\n" +
+	"\x12LeaveQueueResponse\"9\n" +
+	"\x12ListPlayersRequest\x12#\n" +
+	"\rsession_token\x18\x01 \x01(\tR\fsessionToken\"g\n" +
+	"\x16ChallengePlayerRequest\x12#\n" +
+	"\rsession_token\x18\x01 \x01(\tR\fsessionToken\x12(\n" +
+	"\x10target_player_id\x18\x02 \x01(\tR\x0etargetPlayerId\"4\n" +
 	"\x17ChallengePlayerResponse\x12\x19\n" +
-	"\bmatch_id\x18\x01 \x01(\tR\amatchId\"N\n" +
-	"\x15RespondToMatchRequest\x12\x19\n" +
-	"\bmatch_id\x18\x01 \x01(\tR\amatchId\x12\x1a\n" +
-	"\baccepted\x18\x02 \x01(\bR\baccepted\"\x10\n" +
-	"\x0eForfeitRequest\"\x11\n" +
-	"\x0fForfeitResponse\"=\n" +
-	"\x16SubscribeEventsRequest\x12#\n" +
-	"\rsession_token\x18\x01 \x01(\tR\fsessionToken\";\n" +
-	"\x11PlaceShipsRequest\x12&\n" +
-	"\x05ships\x18\x01 \x03(\v2\x10.pirates.v1.ShipR\x05ships\"?\n" +
-	"\rAttackRequest\x12.\n" +
-	"\x06target\x18\x01 \x01(\v2\x16.pirates.v1.CoordinateR\x06target\"\x8e\x01\n" +
-	"\x0fUsePowerRequest\x12+\n" +
-	"\x05power\x18\x01 \x01(\x0e2\x15.pirates.v1.PowerTypeR\x05power\x12.\n" +
-	"\x06target\x18\x02 \x01(\v2\x16.pirates.v1.CoordinateR\x06target\x12\x1e\n" +
+	"\bmatch_id\x18\x01 \x01(\tR\amatchId\"s\n" +
+	"\x15RespondToMatchRequest\x12#\n" +
+	"\rsession_token\x18\x01 \x01(\tR\fsessionToken\x12\x19\n" +
+	"\bmatch_id\x18\x02 \x01(\tR\amatchId\x12\x1a\n" +
+	"\baccepted\x18\x03 \x01(\bR\baccepted\"5\n" +
+	"\x0eForfeitRequest\x12#\n" +
+	"\rsession_token\x18\x01 \x01(\tR\fsessionToken\"\x11\n" +
+	"\x0fForfeitResponse\"`\n" +
+	"\x11PlaceShipsRequest\x12#\n" +
+	"\rsession_token\x18\x01 \x01(\tR\fsessionToken\x12&\n" +
+	"\x05ships\x18\x02 \x03(\v2\x10.pirates.v1.ShipR\x05ships\"d\n" +
+	"\rAttackRequest\x12#\n" +
+	"\rsession_token\x18\x01 \x01(\tR\fsessionToken\x12.\n" +
+	"\x06target\x18\x02 \x01(\v2\x16.pirates.v1.CoordinateR\x06target\"\xb3\x01\n" +
+	"\x0fUsePowerRequest\x12#\n" +
+	"\rsession_token\x18\x01 \x01(\tR\fsessionToken\x12+\n" +
+	"\x05power\x18\x02 \x01(\x0e2\x15.pirates.v1.PowerTypeR\x05power\x12.\n" +
+	"\x06target\x18\x03 \x01(\v2\x16.pirates.v1.CoordinateR\x06target\x12\x1e\n" +
 	"\n" +
-	"horizontal\x18\x03 \x01(\bR\n" +
-	"horizontal\"\x7f\n" +
+	"horizontal\x18\x04 \x01(\bR\n" +
+	"horizontal\"=\n" +
+	"\x16SubscribeEventsRequest\x12#\n" +
+	"\rsession_token\x18\x01 \x01(\tR\fsessionToken\"\x7f\n" +
 	"\x11QueueStatusUpdate\x12\x19\n" +
 	"\bin_queue\x18\x01 \x01(\bR\ainQueue\x12%\n" +
 	"\x0equeue_position\x18\x02 \x01(\x05R\rqueuePosition\x12(\n" +
@@ -2181,10 +2262,10 @@ var file_pirates_v1_pirates_proto_goTypes = []any{
 	(*RespondToMatchRequest)(nil),   // 15: pirates.v1.RespondToMatchRequest
 	(*ForfeitRequest)(nil),          // 16: pirates.v1.ForfeitRequest
 	(*ForfeitResponse)(nil),         // 17: pirates.v1.ForfeitResponse
-	(*SubscribeEventsRequest)(nil),  // 18: pirates.v1.SubscribeEventsRequest
-	(*PlaceShipsRequest)(nil),       // 19: pirates.v1.PlaceShipsRequest
-	(*AttackRequest)(nil),           // 20: pirates.v1.AttackRequest
-	(*UsePowerRequest)(nil),         // 21: pirates.v1.UsePowerRequest
+	(*PlaceShipsRequest)(nil),       // 18: pirates.v1.PlaceShipsRequest
+	(*AttackRequest)(nil),           // 19: pirates.v1.AttackRequest
+	(*UsePowerRequest)(nil),         // 20: pirates.v1.UsePowerRequest
+	(*SubscribeEventsRequest)(nil),  // 21: pirates.v1.SubscribeEventsRequest
 	(*QueueStatusUpdate)(nil),       // 22: pirates.v1.QueueStatusUpdate
 	(*PlayerListUpdate)(nil),        // 23: pirates.v1.PlayerListUpdate
 	(*MatchProposal)(nil),           // 24: pirates.v1.MatchProposal
@@ -2238,11 +2319,11 @@ var file_pirates_v1_pirates_proto_depIdxs = []int32{
 	12, // 35: pirates.v1.PiratesService.ListPlayers:input_type -> pirates.v1.ListPlayersRequest
 	13, // 36: pirates.v1.PiratesService.ChallengePlayer:input_type -> pirates.v1.ChallengePlayerRequest
 	15, // 37: pirates.v1.PiratesService.RespondToMatch:input_type -> pirates.v1.RespondToMatchRequest
-	19, // 38: pirates.v1.PiratesService.PlaceShips:input_type -> pirates.v1.PlaceShipsRequest
-	20, // 39: pirates.v1.PiratesService.Attack:input_type -> pirates.v1.AttackRequest
-	21, // 40: pirates.v1.PiratesService.UsePower:input_type -> pirates.v1.UsePowerRequest
+	18, // 38: pirates.v1.PiratesService.PlaceShips:input_type -> pirates.v1.PlaceShipsRequest
+	19, // 39: pirates.v1.PiratesService.Attack:input_type -> pirates.v1.AttackRequest
+	20, // 40: pirates.v1.PiratesService.UsePower:input_type -> pirates.v1.UsePowerRequest
 	16, // 41: pirates.v1.PiratesService.Forfeit:input_type -> pirates.v1.ForfeitRequest
-	18, // 42: pirates.v1.PiratesService.SubscribeEvents:input_type -> pirates.v1.SubscribeEventsRequest
+	21, // 42: pirates.v1.PiratesService.SubscribeEvents:input_type -> pirates.v1.SubscribeEventsRequest
 	8,  // 43: pirates.v1.PiratesService.Connect:output_type -> pirates.v1.ConnectResponse
 	22, // 44: pirates.v1.PiratesService.JoinQueue:output_type -> pirates.v1.QueueStatusUpdate
 	11, // 45: pirates.v1.PiratesService.LeaveQueue:output_type -> pirates.v1.LeaveQueueResponse

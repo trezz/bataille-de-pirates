@@ -88,6 +88,32 @@ function isPlacementComplete(ships) {
     return ships.length >= SHIPS.length;
 }
 
+function placeShipsRandomly(grid, ships) {
+    ships.length = 0;
+    for (let y = 0; y < GRID_SIZE; y++) {
+        for (let x = 0; x < GRID_SIZE; x++) {
+            grid[y][x] = null;
+        }
+    }
+
+    for (const shipTemplate of SHIPS) {
+        let placed = false;
+        let attempts = 0;
+        while (!placed && attempts < 100) {
+            const horizontal = Math.random() < 0.5;
+            const maxX = horizontal ? GRID_SIZE - shipTemplate.size : GRID_SIZE - 1;
+            const maxY = horizontal ? GRID_SIZE - 1 : GRID_SIZE - shipTemplate.size;
+            const startX = Math.floor(Math.random() * (maxX + 1));
+            const startY = Math.floor(Math.random() * (maxY + 1));
+
+            if (placeShipOnGrid(grid, ships, shipTemplate, startX, startY, horizontal)) {
+                placed = true;
+            }
+            attempts++;
+        }
+    }
+}
+
 function getOpponent(currentPlayer) {
     return currentPlayer === 1 ? 2 : 1;
 }
