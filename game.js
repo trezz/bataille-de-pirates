@@ -7,6 +7,7 @@ let multiplayerClient = null;
 let currentMatchId = null;
 let matchTimeoutInterval = null;
 let opponentInfo = null;
+let pendingGameOver = null;
 
 function initGame() {
     gameState = createInitialGameState();
@@ -76,6 +77,11 @@ function backToMenu() {
 async function connectToServer() {
     const playerName = $('player-name').value.trim();
     const serverUrl = $('server-url').value.trim();
+
+    if (!playerName) {
+        alert('Veuillez entrer votre nom de pirate');
+        return;
+    }
 
     if (!serverUrl) {
         alert('Veuillez entrer l\'URL du serveur');
@@ -147,7 +153,7 @@ function setupMultiplayerEventHandlers() {
     });
 
     multiplayerClient.on('gameOver', (result) => {
-        handleOnlineGameOver(result);
+        pendingGameOver = result;
     });
 
     multiplayerClient.on('error', (error) => {
@@ -763,18 +769,21 @@ function showOnlinePowerResult(result) {
     result.cellsAffected.forEach(cell => {
         const isHit = cell.state === 3 || cell.state === 4; // HIT or SUNK
         const isSunk = cell.state === 4;
+        const isRevealed = cell.state === 5; // REVEALED (sonar)
         const sunkShip = isSunk && result.sunkShips ? result.sunkShips.find(s => true) : null;
-        updateOnlineAttackGrid(cell.position, isHit, sunkShip);
+        updateOnlineAttackGrid(cell.position, isHit, sunkShip, isRevealed);
     });
 
     showScreen('result-screen');
 }
 
-function updateOnlineAttackGrid(coord, hit, sunkShip) {
+function updateOnlineAttackGrid(coord, hit, sunkShip, revealed) {
     if (sunkShip) {
         gameState.opponentGrid[coord.y][coord.x] = { hit: true, sunk: true, shipId: sunkShip.name };
     } else if (hit) {
         gameState.opponentGrid[coord.y][coord.x] = { hit: true, shipId: 'unknown' };
+    } else if (revealed) {
+        gameState.opponentGrid[coord.y][coord.x] = { revealed: true };
     } else {
         gameState.opponentGrid[coord.y][coord.x] = 'miss';
     }
@@ -785,6 +794,8 @@ function updateOnlineAttackGrid(coord, hit, sunkShip) {
             cell.classList.add('sunk');
         } else if (hit) {
             cell.classList.add('hit');
+        } else if (revealed) {
+            cell.classList.add('revealed');
         } else {
             cell.classList.add('miss');
         }
@@ -984,6 +995,11 @@ function showAttackResult(result) {
 
 function handleContinue() {
     if (isOnlineMode) {
+        if (pendingGameOver) {
+            handleOnlineGameOver(pendingGameOver);
+            pendingGameOver = null;
+            return;
+        }
         $('waiting-message').textContent = 'Tour de l\'adversaire...';
         showScreen('waiting-opponent-screen');
         return;

@@ -315,6 +315,8 @@ func (s *PiratesServer) SubscribeEvents(
 		return connect.NewError(connect.CodeUnauthenticated, errors.New("invalid session token"))
 	}
 
+	defer s.cleanupPlayer(p)
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -328,6 +330,11 @@ func (s *PiratesServer) SubscribeEvents(
 			}
 		}
 	}
+}
+
+func (s *PiratesServer) cleanupPlayer(p *player.Player) {
+	s.matchmaker.LeaveQueue(p.Proto.Id)
+	s.registry.Remove(p.Proto.Id)
 }
 
 func (s *PiratesServer) handleMatchProposed(playerID string, match *matchmaker.Match) {
