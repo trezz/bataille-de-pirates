@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"math/big"
 	"sync"
+	"time"
 
 	"github.com/google/uuid"
 	piratesv1 "github.com/trezz/bataille-de-pirates/server/gen/pirates/v1"
@@ -46,6 +47,7 @@ type Player struct {
 	SessionToken  string
 	CurrentGameID string
 	EventChannel  chan *piratesv1.GameEvent
+	LastSeen      time.Time
 }
 
 type Registry struct {
@@ -83,6 +85,7 @@ func (r *Registry) Register(displayName string) (*Player, error) {
 		},
 		SessionToken: token,
 		EventChannel: make(chan *piratesv1.GameEvent, 100),
+		LastSeen:     time.Now(),
 	}
 
 	r.players[id] = player
@@ -137,6 +140,29 @@ func (r *Registry) Remove(id string) {
 		delete(r.tokenToPlayer, player.SessionToken)
 		close(player.EventChannel)
 		delete(r.players, id)
+	}
+}
+
+func (r *Registry) UpdateLastSeen(id string) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if player, ok := r.players[id]; ok {
+		player.LastSeen = time.Now()
+	}
+}
+
+func (r *Registry) CleanupStale(timeout time.Duration) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	now := time.Now()
+	for id, player := range r.players {
+		if now.Sub(player.LastSeen) > timeout {
+			delete(r.tokenToPlayer, player.SessionToken)
+			close(player.EventChannel)
+			delete(r.players, id)
+		}
 	}
 }
 

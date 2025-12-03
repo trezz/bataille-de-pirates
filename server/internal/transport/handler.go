@@ -35,7 +35,18 @@ func NewPiratesServer() *PiratesServer {
 	s.matchmaker.OnMatchResult = s.handleMatchResult
 	s.matchmaker.OnGameCreated = s.handleGameCreated
 
+	go s.runCleanup()
+
 	return s
+}
+
+func (s *PiratesServer) runCleanup() {
+	ticker := time.NewTicker(5 * time.Second)
+	defer ticker.Stop()
+
+	for range ticker.C {
+		s.registry.CleanupStale(30 * time.Second)
+	}
 }
 
 func (s *PiratesServer) getPlayerFromContext(ctx context.Context) (*player.Player, error) {
@@ -103,10 +114,12 @@ func (s *PiratesServer) ListPlayers(
 	ctx context.Context,
 	req *connect.Request[pb.ListPlayersRequest],
 ) (*connect.Response[pb.PlayerListUpdate], error) {
-	_, ok := s.registry.GetByToken(req.Msg.SessionToken)
+	p, ok := s.registry.GetByToken(req.Msg.SessionToken)
 	if !ok {
 		return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("invalid session token"))
 	}
+
+	s.registry.UpdateLastSeen(p.Proto.Id)
 
 	available := s.registry.GetAvailablePlayers()
 	protoPlayers := make([]*pb.Player, len(available))
