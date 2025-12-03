@@ -265,10 +265,27 @@ func (m *Matchmaker) runAutoMatch() {
 		case <-m.stopCh:
 			return
 		case <-ticker.C:
+			m.cleanupExpiredQueueEntries()
 			m.tryAutoMatch()
 			m.cleanupExpiredMatches()
 		}
 	}
+}
+
+func (m *Matchmaker) cleanupExpiredQueueEntries() {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	now := time.Now()
+	queueTimeout := 30 * time.Second
+
+	newQueue := make([]QueueEntry, 0, len(m.queue))
+	for _, entry := range m.queue {
+		if now.Sub(entry.JoinedAt) < queueTimeout {
+			newQueue = append(newQueue, entry)
+		}
+	}
+	m.queue = newQueue
 }
 
 func (m *Matchmaker) tryAutoMatch() {

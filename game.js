@@ -176,7 +176,9 @@ function renderPlayerList(players) {
     const container = $('players-list');
     container.innerHTML = '';
 
-    const otherPlayers = players.filter(p => p.id !== multiplayerClient.player.id);
+    const otherPlayers = players
+        .filter(p => p.id !== multiplayerClient.player.id)
+        .sort((a, b) => a.displayName.localeCompare(b.displayName));
 
     if (otherPlayers.length === 0) {
         container.innerHTML = '<p class="no-players">Aucun joueur disponible</p>';
