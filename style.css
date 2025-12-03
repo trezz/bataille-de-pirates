@@ -517,3 +517,161 @@ h3, h4 {
         box-shadow: 0 0 0 20px rgba(243, 156, 18, 0);
     }
 }
+
+.mode-selection {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.pirate-input {
+    font-family: 'Patrick Hand', cursive;
+    font-size: 1.2rem;
+    padding: 12px 20px;
+    border: 3px solid var(--wood);
+    border-radius: 10px;
+    background: var(--parchment);
+    color: var(--wood-dark);
+    width: 100%;
+    max-width: 300px;
+    text-align: center;
+    margin: 10px 0;
+}
+
+.pirate-input::placeholder {
+    color: var(--wood);
+    opacity: 0.7;
+}
+
+.pirate-input:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 10px var(--gold);
+}
+
+#connection-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+#connection-status {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--sand);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 20px auto;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+#player-info {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 15px 25px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    font-size: 1.2rem;
+}
+
+#lobby-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+#queue-status {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+#players-list-container {
+    width: 100%;
+    max-width: 350px;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+#players-list-container h3 {
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+#players-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.player-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 10px 15px;
+    border-radius: 8px;
+}
+
+.player-item .player-name {
+    font-size: 1.1rem;
+    color: var(--sand-light);
+}
+
+.player-item .challenge-btn {
+    font-size: 0.9rem;
+    padding: 5px 15px;
+}
+
+.opponent-name {
+    font-family: 'Pirata One', cursive;
+    font-size: 1.5rem;
+    color: var(--gold);
+    margin: 15px 0;
+}
+
+.match-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+#waiting-opponent-screen p {
+    font-size: 1.2rem;
+    color: var(--sand-light);
+    margin-bottom: 20px;
+}
+
+.online-indicator {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    background: var(--success);
+    border-radius: 50%;
+    margin-right: 8px;
+    animation: pulse 2s infinite;
+}
+
+.no-players {
+    text-align: center;
+    color: var(--sand);
+    font-style: italic;
+    padding: 20px;
+}

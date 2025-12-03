@@ -13,8 +13,69 @@
             <div class="skull-decoration">☠️</div>
             <h1>Bataille de Pirates</h1>
             <p class="subtitle">Préparez vos canons, moussaillons!</p>
-            <button id="start-game" class="pirate-btn">Hisser les voiles!</button>
+            <div class="mode-selection">
+                <button id="start-local" class="pirate-btn">⚓ Partie Locale</button>
+                <button id="start-online" class="pirate-btn">🌐 Partie en Ligne</button>
+            </div>
             <div class="ship-decoration">⛵</div>
+        </div>
+
+        <!-- Écran de connexion en ligne -->
+        <div id="online-screen" class="screen">
+            <div class="skull-decoration">🌐</div>
+            <h2>Mode En Ligne</h2>
+            <div id="connection-form">
+                <input type="text" id="player-name" class="pirate-input" placeholder="Votre nom de pirate..." maxlength="20">
+                <input type="text" id="server-url" class="pirate-input" placeholder="URL du serveur" value="http://localhost:8080">
+                <button id="connect-btn" class="pirate-btn">Se Connecter</button>
+            </div>
+            <div id="connection-status" class="hidden">
+                <p id="status-message">Connexion...</p>
+                <div class="spinner"></div>
+            </div>
+            <button id="back-to-menu" class="pirate-btn small">← Retour</button>
+        </div>
+
+        <!-- Écran du lobby -->
+        <div id="lobby-screen" class="screen">
+            <h2>⚓ Lobby</h2>
+            <div id="player-info">
+                <p>Bienvenue, <span id="my-player-name">Pirate</span>!</p>
+            </div>
+            <div id="lobby-actions">
+                <button id="join-queue-btn" class="pirate-btn">🎲 Matchmaking</button>
+                <button id="leave-queue-btn" class="pirate-btn danger hidden">Quitter la file</button>
+            </div>
+            <div id="queue-status" class="hidden">
+                <p id="queue-message">En attente d'un adversaire...</p>
+                <div class="spinner"></div>
+            </div>
+            <div id="players-list-container">
+                <h3>Joueurs disponibles:</h3>
+                <div id="players-list"></div>
+            </div>
+            <button id="disconnect-btn" class="pirate-btn small danger">Déconnexion</button>
+        </div>
+
+        <!-- Écran de proposition de match -->
+        <div id="match-proposal-screen" class="screen">
+            <div class="skull-decoration">⚔️</div>
+            <h2>Défi!</h2>
+            <p id="match-proposal-message">Un adversaire vous défie!</p>
+            <p id="match-opponent-name" class="opponent-name"></p>
+            <p id="match-timeout" class="countdown"></p>
+            <div class="match-actions">
+                <button id="accept-match-btn" class="pirate-btn">✓ Accepter</button>
+                <button id="reject-match-btn" class="pirate-btn danger">✗ Refuser</button>
+            </div>
+        </div>
+
+        <!-- Écran d'attente placement adversaire -->
+        <div id="waiting-opponent-screen" class="screen">
+            <div class="skull-decoration">⏳</div>
+            <h2>En attente...</h2>
+            <p id="waiting-message">Votre adversaire place ses navires...</p>
+            <div class="spinner"></div>
         </div>
 
         <!-- Écran de placement des bateaux -->
@@ -112,6 +173,7 @@
     </div>
 
     <script src="gameLogic.js"></script>
+    <script type="module" src="dist/multiplayer.bundle.js"></script>
     <script src="game.js"></script>
 </body>
 </html>

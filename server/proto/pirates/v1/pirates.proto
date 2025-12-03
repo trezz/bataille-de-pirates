@@ -1,0 +1,228 @@
+syntax = "proto3";
+
+package pirates.v1;
+
+option go_package = "github.com/trezz/bataille-de-pirates/server/gen/pirates/v1;piratesv1";
+
+// ============================================================================
+// Service Definition
+// ============================================================================
+
+service PiratesService {
+  // Connection
+  rpc Connect(ConnectRequest) returns (ConnectResponse);
+  
+  // Matchmaking
+  rpc JoinQueue(JoinQueueRequest) returns (QueueStatusUpdate);
+  rpc LeaveQueue(LeaveQueueRequest) returns (LeaveQueueResponse);
+  rpc ListPlayers(ListPlayersRequest) returns (PlayerListUpdate);
+  rpc ChallengePlayer(ChallengePlayerRequest) returns (ChallengePlayerResponse);
+  rpc RespondToMatch(RespondToMatchRequest) returns (MatchResult);
+  
+  // Game actions
+  rpc PlaceShips(PlaceShipsRequest) returns (PlacementResult);
+  rpc Attack(AttackRequest) returns (AttackResult);
+  rpc UsePower(UsePowerRequest) returns (PowerResult);
+  rpc Forfeit(ForfeitRequest) returns (ForfeitResponse);
+  
+  // Server-streaming RPC for real-time events
+  rpc SubscribeEvents(SubscribeEventsRequest) returns (stream GameEvent);
+}
+
+// ============================================================================
+// Common Types
+// ============================================================================
+
+message Coordinate {
+  int32 x = 1;
+  int32 y = 2;
+}
+
+message Ship {
+  string id = 1;
+  string name = 2;
+  int32 size = 3;
+  Coordinate start = 4;
+  bool horizontal = 5;
+}
+
+enum PowerType {
+  POWER_TYPE_UNSPECIFIED = 0;
+  POWER_TYPE_INSTAKILL = 1;
+  POWER_TYPE_TRIPLE = 2;
+  POWER_TYPE_SONAR = 3;
+  POWER_TYPE_KRAKEN = 4;
+}
+
+enum CellState {
+  CELL_STATE_UNKNOWN = 0;
+  CELL_STATE_EMPTY = 1;
+  CELL_STATE_MISS = 2;
+  CELL_STATE_HIT = 3;
+  CELL_STATE_SUNK = 4;
+  CELL_STATE_REVEALED = 5;
+}
+
+message Power {
+  PowerType type = 1;
+  string name = 2;
+}
+
+message Player {
+  string id = 1;
+  string display_name = 2;
+  PlayerStatus status = 3;
+}
+
+enum PlayerStatus {
+  PLAYER_STATUS_UNSPECIFIED = 0;
+  PLAYER_STATUS_ONLINE = 1;
+  PLAYER_STATUS_IN_QUEUE = 2;
+  PLAYER_STATUS_IN_GAME = 3;
+}
+
+// ============================================================================
+// Request/Response Messages
+// ============================================================================
+
+message ConnectRequest {
+  string display_name = 1;
+}
+
+message ConnectResponse {
+  Player player = 1;
+  string session_token = 2;
+}
+
+message JoinQueueRequest {}
+
+message LeaveQueueRequest {}
+
+message LeaveQueueResponse {}
+
+message ListPlayersRequest {}
+
+message ChallengePlayerRequest {
+  string target_player_id = 1;
+}
+
+message ChallengePlayerResponse {
+  string match_id = 1;
+}
+
+message RespondToMatchRequest {
+  string match_id = 1;
+  bool accepted = 2;
+}
+
+message ForfeitRequest {}
+
+message ForfeitResponse {}
+
+message SubscribeEventsRequest {
+  string session_token = 1;
+}
+
+message PlaceShipsRequest {
+  repeated Ship ships = 1;
+}
+
+message AttackRequest {
+  Coordinate target = 1;
+}
+
+message UsePowerRequest {
+  PowerType power = 1;
+  Coordinate target = 2;
+  bool horizontal = 3;
+}
+
+// ============================================================================
+// Response/Event Messages
+// ============================================================================
+
+message QueueStatusUpdate {
+  bool in_queue = 1;
+  int32 queue_position = 2;
+  int32 players_in_queue = 3;
+}
+
+message PlayerListUpdate {
+  repeated Player available_players = 1;
+}
+
+message MatchProposal {
+  string match_id = 1;
+  Player opponent = 2;
+  bool you_initiated = 3;
+  int32 timeout_seconds = 4;
+}
+
+message MatchResult {
+  string match_id = 1;
+  bool accepted = 2;
+  string rejection_reason = 3;
+}
+
+message GameStarted {
+  string game_id = 1;
+  Player opponent = 2;
+  bool your_turn_first = 3;
+}
+
+message PlacementResult {
+  bool valid = 1;
+  string error_message = 2;
+  bool waiting_for_opponent = 3;
+}
+
+message TurnStarted {
+  bool your_turn = 1;
+  repeated Power available_powers = 2;
+}
+
+message AttackResult {
+  Coordinate target = 1;
+  bool hit = 2;
+  Ship sunk_ship = 3;
+  Power power_gained = 4;
+}
+
+message CellReveal {
+  Coordinate position = 1;
+  CellState state = 2;
+}
+
+message PowerResult {
+  PowerType power_used = 1;
+  repeated CellReveal cells_affected = 2;
+  repeated Ship sunk_ships = 3;
+  string message = 4;
+}
+
+message OpponentAction {
+  oneof action {
+    AttackResult attack = 1;
+    PowerResult power = 2;
+  }
+  repeated CellReveal your_grid_updates = 3;
+}
+
+message GameOver {
+  bool you_won = 1;
+  string reason = 2;
+}
+
+message GameEvent {
+  oneof event {
+    QueueStatusUpdate queue_status = 1;
+    PlayerListUpdate player_list = 2;
+    MatchProposal match_proposal = 3;
+    MatchResult match_result = 4;
+    GameStarted game_started = 5;
+    TurnStarted turn_started = 6;
+    OpponentAction opponent_action = 7;
+    GameOver game_over = 8;
+    PlacementResult placement_update = 9;
+  }
+}

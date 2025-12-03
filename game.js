@@ -2,6 +2,11 @@
 // In browser context, these are global variables from gameLogic.js
 
 let gameState = null;
+let isOnlineMode = false;
+let multiplayerClient = null;
+let currentMatchId = null;
+let matchTimeoutInterval = null;
+let opponentInfo = null;
 
 function initGame() {
     gameState = createInitialGameState();
@@ -26,7 +31,8 @@ function $(id) {
 // =============================================================================
 
 function setupEventListeners() {
-    $('start-game').addEventListener('click', startPlacement);
+    $('start-local').addEventListener('click', startLocalGame);
+    $('start-online').addEventListener('click', showOnlineScreen);
     $('rotate-btn').addEventListener('click', rotateShip);
     $('reset-placement').addEventListener('click', resetPlacement);
     $('confirm-placement').addEventListener('click', confirmPlacement);
@@ -34,9 +40,255 @@ function setupEventListeners() {
     $('continue-btn').addEventListener('click', handleContinue);
     $('new-game-btn').addEventListener('click', () => location.reload());
 
+    // Online mode listeners
+    $('back-to-menu').addEventListener('click', backToMenu);
+    $('connect-btn').addEventListener('click', connectToServer);
+    $('join-queue-btn').addEventListener('click', joinMatchmaking);
+    $('leave-queue-btn').addEventListener('click', leaveMatchmaking);
+    $('disconnect-btn').addEventListener('click', disconnectFromServer);
+    $('accept-match-btn').addEventListener('click', () => respondToMatch(true));
+    $('reject-match-btn').addEventListener('click', () => respondToMatch(false));
+
     document.querySelectorAll('.ship-to-place').forEach(ship => {
         ship.addEventListener('click', () => selectShip(ship));
     });
+}
+
+function startLocalGame() {
+    isOnlineMode = false;
+    startPlacement();
+}
+
+function showOnlineScreen() {
+    showScreen('online-screen');
+}
+
+function backToMenu() {
+    showScreen('welcome-screen');
+}
+
+async function connectToServer() {
+    const playerName = $('player-name').value.trim();
+    const serverUrl = $('server-url').value.trim();
+
+    if (!serverUrl) {
+        alert('Veuillez entrer l\'URL du serveur');
+        return;
+    }
+
+    $('connection-form').classList.add('hidden');
+    $('connection-status').classList.remove('hidden');
+    $('status-message').textContent = 'Connexion...';
+
+    try {
+        multiplayerClient = new window.MultiplayerClient();
+        const player = await multiplayerClient.connect(serverUrl, playerName);
+
+        setupMultiplayerEventHandlers();
+
+        $('my-player-name').textContent = player.displayName;
+        showScreen('lobby-screen');
+
+        refreshPlayerList();
+    } catch (error) {
+        console.error('Connection error:', error);
+        $('status-message').textContent = 'Erreur de connexion: ' + error.message;
+        setTimeout(() => {
+            $('connection-form').classList.remove('hidden');
+            $('connection-status').classList.add('hidden');
+        }, 2000);
+    }
+}
+
+function setupMultiplayerEventHandlers() {
+    multiplayerClient.on('queueStatus', (status) => {
+        if (status.inQueue) {
+            $('queue-message').textContent = `En attente... (${status.playersInQueue} joueur(s) dans la file)`;
+        }
+    });
+
+    multiplayerClient.on('playerList', (update) => {
+        renderPlayerList(update.availablePlayers);
+    });
+
+    multiplayerClient.on('matchProposal', (proposal) => {
+        showMatchProposal(proposal);
+    });
+
+    multiplayerClient.on('matchResult', (result) => {
+        handleMatchResult(result);
+    });
+
+    multiplayerClient.on('gameStarted', (game) => {
+        startOnlineGame(game);
+    });
+
+    multiplayerClient.on('placementUpdate', (result) => {
+        if (result.waitingForOpponent) {
+            $('waiting-message').textContent = 'Votre adversaire place ses navires...';
+            showScreen('waiting-opponent-screen');
+        }
+    });
+
+    multiplayerClient.on('turnStarted', (turn) => {
+        handleTurnStarted(turn);
+    });
+
+    multiplayerClient.on('opponentAction', (action) => {
+        handleOpponentAction(action);
+    });
+
+    multiplayerClient.on('gameOver', (result) => {
+        handleOnlineGameOver(result);
+    });
+
+    multiplayerClient.on('error', (error) => {
+        console.error('Multiplayer error:', error);
+        alert('Erreur de connexion. Retour au menu.');
+        disconnectFromServer();
+    });
+}
+
+async function refreshPlayerList() {
+    try {
+        const result = await multiplayerClient.listPlayers();
+        renderPlayerList(result.availablePlayers);
+    } catch (error) {
+        console.error('Failed to refresh player list:', error);
+    }
+}
+
+function renderPlayerList(players) {
+    const container = $('players-list');
+    container.innerHTML = '';
+
+    const otherPlayers = players.filter(p => p.id !== multiplayerClient.player.id);
+
+    if (otherPlayers.length === 0) {
+        container.innerHTML = '<p class="no-players">Aucun joueur disponible</p>';
+        return;
+    }
+
+    otherPlayers.forEach(player => {
+        const item = document.createElement('div');
+        item.className = 'player-item';
+        item.innerHTML = `
+            <span class="player-name"><span class="online-indicator"></span>${player.displayName}</span>
+            <button class="pirate-btn small challenge-btn" data-player-id="${player.id}">⚔️ Défier</button>
+        `;
+        item.querySelector('.challenge-btn').addEventListener('click', () => challengePlayer(player.id));
+        container.appendChild(item);
+    });
+}
+
+async function challengePlayer(playerId) {
+    try {
+        await multiplayerClient.challengePlayer(playerId);
+    } catch (error) {
+        console.error('Failed to challenge player:', error);
+        alert('Impossible de défier ce joueur');
+    }
+}
+
+async function joinMatchmaking() {
+    try {
+        await multiplayerClient.joinQueue();
+        $('join-queue-btn').classList.add('hidden');
+        $('leave-queue-btn').classList.remove('hidden');
+        $('queue-status').classList.remove('hidden');
+    } catch (error) {
+        console.error('Failed to join queue:', error);
+    }
+}
+
+async function leaveMatchmaking() {
+    try {
+        await multiplayerClient.leaveQueue();
+        $('join-queue-btn').classList.remove('hidden');
+        $('leave-queue-btn').classList.add('hidden');
+        $('queue-status').classList.add('hidden');
+    } catch (error) {
+        console.error('Failed to leave queue:', error);
+    }
+}
+
+function showMatchProposal(proposal) {
+    currentMatchId = proposal.matchId;
+    opponentInfo = proposal.opponent;
+
+    if (proposal.youInitiated) {
+        $('match-proposal-message').textContent = 'En attente de la réponse de...';
+    } else {
+        $('match-proposal-message').textContent = 'Un adversaire vous défie!';
+    }
+
+    $('match-opponent-name').textContent = proposal.opponent.displayName;
+
+    let timeLeft = proposal.timeoutSeconds;
+    $('match-timeout').textContent = `${timeLeft}s`;
+
+    if (matchTimeoutInterval) clearInterval(matchTimeoutInterval);
+    matchTimeoutInterval = setInterval(() => {
+        timeLeft--;
+        $('match-timeout').textContent = `${timeLeft}s`;
+        if (timeLeft <= 0) {
+            clearInterval(matchTimeoutInterval);
+        }
+    }, 1000);
+
+    showScreen('match-proposal-screen');
+}
+
+async function respondToMatch(accepted) {
+    if (matchTimeoutInterval) {
+        clearInterval(matchTimeoutInterval);
+        matchTimeoutInterval = null;
+    }
+
+    try {
+        await multiplayerClient.respondToMatch(currentMatchId, accepted);
+    } catch (error) {
+        console.error('Failed to respond to match:', error);
+    }
+}
+
+function handleMatchResult(result) {
+    if (matchTimeoutInterval) {
+        clearInterval(matchTimeoutInterval);
+        matchTimeoutInterval = null;
+    }
+
+    if (!result.accepted) {
+        alert(result.rejectionReason || 'Match refusé');
+        showScreen('lobby-screen');
+    }
+}
+
+function startOnlineGame(game) {
+    isOnlineMode = true;
+    opponentInfo = game.opponent;
+
+    gameState = createInitialGameState();
+    gameState.phase = 'placement';
+    gameState.currentPlayer = 1;
+    gameState.onlineGameId = game.gameId;
+    gameState.myTurnFirst = game.yourTurnFirst;
+
+    resetPlacementUI();
+    $('placement-player').textContent = multiplayerClient.player.displayName;
+    showScreen('placement-screen');
+    renderPlacementGrid();
+}
+
+function disconnectFromServer() {
+    if (multiplayerClient) {
+        multiplayerClient.disconnect();
+        multiplayerClient = null;
+    }
+    isOnlineMode = false;
+    currentMatchId = null;
+    opponentInfo = null;
+    showScreen('welcome-screen');
 }
 
 // =============================================================================
@@ -179,18 +431,36 @@ function checkPlacementComplete() {
     $('confirm-placement').disabled = !isPlacementComplete(ships);
 }
 
-function confirmPlacement() {
-    if (gameState.currentPlayer === 1) {
-        gameState.currentPlayer = 2;
-        resetPlacementUI();
-        showTransition('Passez le téléphone au Capitaine 2', () => {
-            showScreen('placement-screen');
-            renderPlacementGrid();
-        });
+async function confirmPlacement() {
+    if (isOnlineMode) {
+        const ships = gameState.players[1].ships;
+        try {
+            const result = await multiplayerClient.placeShips(ships);
+            if (!result.valid) {
+                alert('Placement invalide: ' + result.errorMessage);
+                return;
+            }
+            if (result.waitingForOpponent) {
+                $('waiting-message').textContent = 'Votre adversaire place ses navires...';
+                showScreen('waiting-opponent-screen');
+            }
+        } catch (error) {
+            console.error('Failed to place ships:', error);
+            alert('Erreur lors du placement');
+        }
     } else {
-        gameState.phase = 'battle';
-        gameState.currentPlayer = 1;
-        showTransition('Capitaine 1, préparez vos canons!', startBattle);
+        if (gameState.currentPlayer === 1) {
+            gameState.currentPlayer = 2;
+            resetPlacementUI();
+            showTransition('Passez le téléphone au Capitaine 2', () => {
+                showScreen('placement-screen');
+                renderPlacementGrid();
+            });
+        } else {
+            gameState.phase = 'battle';
+            gameState.currentPlayer = 1;
+            showTransition('Capitaine 1, préparez vos canons!', startBattle);
+        }
     }
 }
 
@@ -378,14 +648,194 @@ function clearPowerPreview() {
 // Attack Handling
 // =============================================================================
 
-function handleAttack(x, y) {
-    const opponent = getOpponent(gameState.currentPlayer);
-
-    if (gameState.activePower) {
-        executePowerAttackAndShow(x, y, opponent);
+async function handleAttack(x, y) {
+    if (isOnlineMode) {
+        await handleOnlineAttack(x, y);
     } else {
-        executeNormalAttackAndShow(x, y, opponent);
+        const opponent = getOpponent(gameState.currentPlayer);
+        if (gameState.activePower) {
+            executePowerAttackAndShow(x, y, opponent);
+        } else {
+            executeNormalAttackAndShow(x, y, opponent);
+        }
     }
+}
+
+async function handleOnlineAttack(x, y) {
+    try {
+        if (gameState.activePower) {
+            const horizontal = gameState.tripleDirection === 'horizontal';
+            const result = await multiplayerClient.usePower(gameState.activePower, x, y, horizontal);
+            showOnlinePowerResult(result);
+            gameState.activePower = null;
+        } else {
+            const result = await multiplayerClient.attack(x, y);
+            showOnlineAttackResult(result);
+        }
+    } catch (error) {
+        console.error('Attack error:', error);
+        alert('Erreur lors de l\'attaque');
+    }
+}
+
+function showOnlineAttackResult(result) {
+    const resultIcon = $('result-icon');
+    const resultTitle = $('result-title');
+    const resultMessage = $('result-message');
+    const powerGained = $('power-gained');
+
+    if (result.sunkShip) {
+        resultIcon.textContent = '☠️';
+        resultTitle.textContent = 'Coulé!';
+        resultMessage.textContent = `Le ${result.sunkShip.name} ennemi rejoint les abysses!`;
+
+        if (result.powerGained) {
+            powerGained.classList.remove('hidden');
+            $('power-gained-name').textContent = result.powerGained.name;
+            $('power-description').textContent = `L'adversaire obtient ce pouvoir!`;
+        } else {
+            powerGained.classList.add('hidden');
+        }
+    } else if (result.hit) {
+        resultIcon.textContent = '💥';
+        resultTitle.textContent = 'Touché!';
+        resultMessage.textContent = 'Bien visé, Capitaine!';
+        powerGained.classList.add('hidden');
+    } else {
+        resultIcon.textContent = '💨';
+        resultTitle.textContent = 'À l\'eau!';
+        resultMessage.textContent = 'Le boulet s\'enfonce dans les vagues...';
+        powerGained.classList.add('hidden');
+    }
+
+    updateOnlineAttackGrid(result.target, result.hit, result.sunkShip);
+    showScreen('result-screen');
+}
+
+function showOnlinePowerResult(result) {
+    const resultIcon = $('result-icon');
+    const resultTitle = $('result-title');
+    const resultMessage = $('result-message');
+    const powerGained = $('power-gained');
+
+    const powerIcons = {
+        1: '💀', // INSTAKILL
+        2: '🎯', // TRIPLE
+        3: '📡', // SONAR
+        4: '🐙', // KRAKEN
+    };
+
+    resultIcon.textContent = powerIcons[result.powerUsed] || '⚡';
+    resultTitle.textContent = result.message || 'Pouvoir utilisé!';
+    resultMessage.textContent = '';
+
+    if (result.sunkShips && result.sunkShips.length > 0) {
+        powerGained.classList.remove('hidden');
+        $('power-gained-name').textContent = result.sunkShips[0].name + ' coulé!';
+        $('power-description').textContent = `L'adversaire obtient un pouvoir!`;
+    } else {
+        powerGained.classList.add('hidden');
+    }
+
+    result.cellsAffected.forEach(cell => {
+        const isHit = cell.state === 3 || cell.state === 4; // HIT or SUNK
+        updateOnlineAttackGrid(cell.position, isHit, null);
+    });
+
+    showScreen('result-screen');
+}
+
+function updateOnlineAttackGrid(coord, hit, sunkShip) {
+    const cell = document.querySelector(`#attack-grid .cell[data-x="${coord.x}"][data-y="${coord.y}"]`);
+    if (cell) {
+        if (sunkShip) {
+            cell.classList.add('sunk');
+        } else if (hit) {
+            cell.classList.add('hit');
+        } else {
+            cell.classList.add('miss');
+        }
+    }
+}
+
+function handleTurnStarted(turn) {
+    gameState.isMyTurn = turn.yourTurn;
+    gameState.availablePowers = turn.availablePowers;
+
+    if (turn.yourTurn) {
+        showScreen('game-screen');
+        renderOnlineBattleUI();
+    } else {
+        $('waiting-message').textContent = 'Tour de l\'adversaire...';
+        showScreen('waiting-opponent-screen');
+    }
+}
+
+function handleOpponentAction(action) {
+    action.yourGridUpdates.forEach(update => {
+        const cell = gameState.players[1].grid[update.position.y][update.position.x];
+        if (cell && cell.shipId) {
+            cell.hit = true;
+            if (update.state === 4) { // SUNK
+                cell.sunk = true;
+            }
+        }
+    });
+}
+
+function handleOnlineGameOver(result) {
+    if (result.youWon) {
+        $('winner').textContent = multiplayerClient.player.displayName;
+    } else {
+        $('winner').textContent = opponentInfo ? opponentInfo.displayName : 'Adversaire';
+    }
+    showScreen('victory-screen');
+}
+
+function renderOnlineBattleUI() {
+    $('current-player').textContent = multiplayerClient.player.displayName;
+    renderOnlinePowers();
+    updateGameInstruction();
+}
+
+function renderOnlinePowers() {
+    const powersList = $('powers-list');
+    powersList.innerHTML = '';
+
+    const powers = gameState.availablePowers || [];
+
+    if (powers.length === 0) {
+        powersList.innerHTML = '<span style="color: var(--sand); font-size: 0.9rem;">Aucun pouvoir</span>';
+        return;
+    }
+
+    const powerIcons = {
+        1: '💀',
+        2: '🎯',
+        3: '📡',
+        4: '🐙',
+    };
+
+    const powerNames = {
+        1: 'instakill',
+        2: 'triple',
+        3: 'sonar',
+        4: 'kraken',
+    };
+
+    powers.forEach((power) => {
+        const btn = document.createElement('button');
+        btn.className = 'pirate-btn power';
+        btn.innerHTML = `${powerIcons[power.type] || '⚡'} ${power.name}`;
+
+        const localPowerName = powerNames[power.type];
+        if (gameState.activePower === localPowerName) {
+            btn.classList.add('active');
+        }
+
+        btn.addEventListener('click', () => togglePower(localPowerName));
+        powersList.appendChild(btn);
+    });
 }
 
 function executeNormalAttackAndShow(x, y, opponent) {
@@ -478,6 +928,12 @@ function showAttackResult(result) {
 // =============================================================================
 
 function handleContinue() {
+    if (isOnlineMode) {
+        $('waiting-message').textContent = 'Tour de l\'adversaire...';
+        showScreen('waiting-opponent-screen');
+        return;
+    }
+
     const opponent = getOpponent(gameState.currentPlayer);
 
     if (checkVictory(gameState.players[opponent].ships)) {
